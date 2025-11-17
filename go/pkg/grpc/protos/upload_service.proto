@@ -1,0 +1,174 @@
+syntax = "proto3";
+
+package syncreve;
+
+option go_package = "github.com/xkeyC/Syncreve/pkg/grpc/protos";
+
+// UploadService provides file upload management
+service UploadService {
+  // Add upload task
+  rpc AddTask(AddUploadTaskRequest) returns (AddUploadTaskResponse) {}
+  
+  // Add batch upload tasks
+  rpc AddBatchTasks(AddBatchUploadTasksRequest) returns (AddUploadTaskResponse) {}
+  
+  // Cancel upload task
+  rpc CancelTask(CancelUploadTaskRequest) returns (CancelUploadTaskResponse) {}
+  
+  // Get upload task info
+  rpc GetTaskInfo(GetUploadTaskInfoRequest) returns (UploadTaskInfoResponse) {}
+  
+  // List upload tasks
+  rpc ListTasks(ListUploadTasksRequest) returns (ListUploadTasksResponse) {}
+  
+  // Get task status stream
+  rpc WatchTaskStatus(WatchUploadTaskStatusRequest) returns (stream UploadTaskStatusUpdate) {}
+  
+  // Pause upload task
+  rpc PauseTask(PauseUploadTaskRequest) returns (PauseUploadTaskResponse) {}
+  
+  // Resume upload task
+  rpc ResumeTask(ResumeUploadTaskRequest) returns (ResumeUploadTaskResponse) {}
+  
+  // Retry failed task
+  rpc RetryTask(RetryUploadTaskRequest) returns (RetryUploadTaskResponse) {}
+  
+  // Clear completed tasks
+  rpc ClearCompleted(ClearUploadCompletedRequest) returns (ClearUploadCompletedResponse) {}
+  
+  // Get upload statistics
+  rpc GetStats(GetUploadStatsRequest) returns (UploadStatsResponse) {}
+}
+
+enum UploadTaskStatus {
+  UPLOAD_WAITING = 0;
+  UPLOADING = 1;
+  UPLOAD_PAUSED = 2;
+  UPLOAD_COMPLETED = 3;
+  UPLOAD_FAILED = 4;
+  UPLOAD_CANCELLED = 5;
+}
+
+message UploadTaskInfo {
+  string id = 1;
+  string account_id = 2;
+  string local_path = 3;
+  string remote_path = 4;
+  string file_name = 5;
+  int64 total_size = 6;
+  int64 uploaded_size = 7;
+  UploadTaskStatus status = 8;
+  string error = 9;
+  string created_at = 10;
+  string updated_at = 11;
+  optional string completed_at = 12;
+  optional double speed = 13; // bytes per second
+  optional double progress = 14; // 0-100
+}
+
+message AddUploadTaskRequest {
+  string account_id = 1;
+  string local_path = 2;
+  string remote_path = 3;
+  optional bool overwrite = 4;
+}
+
+message AddBatchUploadTasksRequest {
+  string account_id = 1;
+  repeated UploadFileInfo files = 2;
+  string remote_base_path = 3;
+  optional bool overwrite = 4;
+}
+
+message UploadFileInfo {
+  string local_path = 1;
+  optional string relative_path = 2; // relative to base path
+}
+
+message AddUploadTaskResponse {
+  repeated string task_ids = 1;
+}
+
+message CancelUploadTaskRequest {
+  string task_id = 1;
+}
+
+message CancelUploadTaskResponse {
+  bool success = 1;
+  optional string error = 2;
+}
+
+message GetUploadTaskInfoRequest {
+  string task_id = 1;
+}
+
+message UploadTaskInfoResponse {
+  UploadTaskInfo task = 1;
+}
+
+message ListUploadTasksRequest {
+  string account_id = 1;
+  optional UploadTaskStatus status = 2;
+  optional int32 page = 3;
+  optional int32 per_page = 4;
+}
+
+message ListUploadTasksResponse {
+  repeated UploadTaskInfo tasks = 1;
+  int64 total = 2;
+}
+
+message WatchUploadTaskStatusRequest {
+  optional string task_id = 1; // If not set, watch all tasks
+}
+
+message UploadTaskStatusUpdate {
+  UploadTaskInfo task = 1;
+}
+
+message PauseUploadTaskRequest {
+  string task_id = 1;
+}
+
+message PauseUploadTaskResponse {
+  bool success = 1;
+}
+
+message ResumeUploadTaskRequest {
+  string task_id = 1;
+}
+
+message ResumeUploadTaskResponse {
+  bool success = 1;
+}
+
+message RetryUploadTaskRequest {
+  string task_id = 1;
+}
+
+message RetryUploadTaskResponse {
+  bool success = 1;
+  optional string new_task_id = 2;
+}
+
+message ClearUploadCompletedRequest {
+  string account_id = 1;
+}
+
+message ClearUploadCompletedResponse {
+  int32 cleared_count = 1;
+}
+
+message GetUploadStatsRequest {
+  string account_id = 1;
+}
+
+message UploadStatsResponse {
+  int64 total_tasks = 1;
+  int64 waiting_tasks = 2;
+  int64 uploading_tasks = 3;
+  int64 completed_tasks = 4;
+  int64 failed_tasks = 5;
+  double total_uploaded_size = 6;
+  double current_speed = 7;
+}

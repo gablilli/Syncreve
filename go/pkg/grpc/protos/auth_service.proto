@@ -1,0 +1,147 @@
+syntax = "proto3";
+
+package syncreve;
+
+option go_package = "github.com/xkeyC/Syncreve/pkg/grpc/protos";
+
+// AuthService provides authentication operations and account management
+service AuthService {
+  // Account Management
+  rpc CreateAccount(CreateAccountRequest) returns (CreateAccountResponse) {}
+  rpc ListAccounts(ListAccountsRequest) returns (ListAccountsResponse) {}
+  rpc GetAccount(GetAccountRequest) returns (GetAccountResponse) {}
+  rpc DeleteAccount(DeleteAccountRequest) returns (DeleteAccountResponse) {}
+  rpc SetActiveAccount(SetActiveAccountRequest) returns (SetActiveAccountResponse) {}
+  rpc GetActiveAccount(GetActiveAccountRequest) returns (GetActiveAccountResponse) {}
+  
+  // Authentication (requires account_id)
+  rpc Login(LoginRequest) returns (LoginResponse) {}
+  rpc Login2FA(Login2FARequest) returns (LoginResponse) {}
+  rpc Logout(LogoutRequest) returns (LogoutResponse) {}
+  
+  // User Info (requires account_id)
+  rpc GetUserInfo(GetUserInfoRequest) returns (UserInfoResponse) {}
+  rpc IsAuthenticated(IsAuthenticatedRequest) returns (IsAuthenticatedResponse) {}
+}
+
+// Account Management Messages
+message CreateAccountRequest {
+  string name = 1;        // User-defined account name
+  string server_url = 2;  // Cloudreve server URL
+}
+
+message CreateAccountResponse {
+  bool success = 1;
+  optional string error = 2;
+  optional AccountInfo account = 3;
+}
+
+message ListAccountsRequest {
+  // Empty for now
+}
+
+message ListAccountsResponse {
+  repeated AccountInfo accounts = 1;
+}
+
+message GetAccountRequest {
+  string account_id = 1;
+}
+
+message GetAccountResponse {
+  bool success = 1;
+  optional string error = 2;
+  optional AccountInfo account = 3;
+}
+
+message DeleteAccountRequest {
+  string account_id = 1;
+}
+
+message DeleteAccountResponse {
+  bool success = 1;
+  optional string error = 2;
+}
+
+message SetActiveAccountRequest {
+  string account_id = 1;
+}
+
+message SetActiveAccountResponse {
+  bool success = 1;
+  optional string error = 2;
+}
+
+message GetActiveAccountRequest {
+  // Empty for now
+}
+
+message GetActiveAccountResponse {
+  bool success = 1;
+  optional string error = 2;
+  optional AccountInfo account = 3;
+}
+
+message AccountInfo {
+  string id = 1;
+  string name = 2;
+  string server_url = 3;
+  bool is_active = 4;
+  bool is_authenticated = 5;
+  optional string email = 6;
+  optional string user_id = 7;
+  optional string last_login_at = 8;
+}
+
+// Authentication Messages
+message LoginRequest {
+  string account_id = 1;
+  string email = 2;
+  string password = 3;
+}
+
+message Login2FARequest {
+  string account_id = 1;
+  string code = 2;
+}
+
+message LoginResponse {
+  bool success = 1;
+  optional string error = 2;
+  optional UserInfo user = 3;
+}
+
+message LogoutRequest {
+  string account_id = 1;
+}
+
+message LogoutResponse {
+  bool success = 1;
+}
+
+message GetUserInfoRequest {
+  string account_id = 1;
+}
+
+message UserInfoResponse {
+  UserInfo user = 1;
+}
+
+message UserInfo {
+  string id = 1;
+  string username = 2;
+  string email = 3;
+  string nickname = 4;
+  string avatar = 5;
+  int64 group_id = 6;
+  int64 storage_used = 7;
+  int64 storage_total = 8;
+}
+
+message IsAuthenticatedRequest {
+  string account_id = 1;
+}
+
+message IsAuthenticatedResponse {
+  bool authenticated = 1;
+}

@@ -1,0 +1,138 @@
+syntax = "proto3";
+
+package syncreve;
+
+option go_package = "github.com/xkeyC/Syncreve/pkg/grpc/protos";
+
+// FileService provides file management operations
+service FileService {
+  // List files in a directory
+  rpc ListFiles(ListFilesRequest) returns (ListFilesResponse) {}
+  
+  // Get file information
+  rpc GetFileInfo(GetFileInfoRequest) returns (FileInfoResponse) {}
+  
+  // Create a file or folder
+  rpc CreateFile(CreateFileRequest) returns (FileInfoResponse) {}
+  
+  // Delete files
+  rpc DeleteFiles(DeleteFilesRequest) returns (DeleteFilesResponse) {}
+  
+  // Rename a file
+  rpc RenameFile(RenameFileRequest) returns (FileInfoResponse) {}
+  
+  // Move files
+  rpc MoveFiles(MoveFilesRequest) returns (MoveFilesResponse) {}
+  
+  // Get file download URL
+  rpc GetFileURL(GetFileURLRequest) returns (FileURLResponse) {}
+  
+  // Get direct download link
+  rpc GetDirectLink(GetDirectLinkRequest) returns (DirectLinkResponse) {}
+}
+
+message ListFilesRequest {
+  string account_id = 1;
+  string path = 2;
+  optional int32 page = 3;
+  optional int32 per_page = 4;
+  optional string order_by = 5;
+  optional bool order_direction_desc = 6;
+  optional string keywords = 7;
+  optional bool refresh = 8;
+}
+
+message ListFilesResponse {
+  repeated FileInfo files = 1;
+  int64 total = 2;
+  string parent_id = 3;
+  string parent_path = 4;
+}
+
+message FileInfo {
+  string id = 1;
+  string name = 2;
+  string path = 3;
+  int64 size = 4;
+  string type = 5; // "file" or "dir"
+  string created_at = 6;
+  string updated_at = 7;
+  optional string source_url = 8;
+  optional int32 source_enabled = 9;
+}
+
+message GetFileInfoRequest {
+  string account_id = 1;
+  string uri = 2;
+  optional bool trace_root = 3;
+  optional bool is_folder = 4;
+}
+
+message FileInfoResponse {
+  FileInfo file = 1;
+}
+
+message CreateFileRequest {
+  string account_id = 1;
+  string path = 2;
+  string name = 3;
+  string type = 4; // "file" or "dir"
+}
+
+message DeleteFilesRequest {
+  string account_id = 1;
+  repeated string uris = 2;
+  optional bool force = 3;
+  optional bool unlink = 4;
+}
+
+message DeleteFilesResponse {
+  int32 count = 1;
+}
+
+message RenameFileRequest {
+  string account_id = 1;
+  string uri = 2;
+  string new_name = 3;
+}
+
+message MoveFilesRequest {
+  string account_id = 1;
+  repeated string src_uris = 2;
+  string dst_path = 3;
+  optional bool overwrite = 4;
+}
+
+message MoveFilesResponse {
+  int32 count = 1;
+}
+
+message GetFileURLRequest {
+  string account_id = 1;
+  string uri = 2;
+  optional bool download = 3;
+}
+
+message FileURLResponse {
+  string url = 1;
+  optional string name = 2;
+}
+
+message GetDirectLinkRequest {
+  string account_id = 1;
+  repeated string uris = 2;
+}
+
+message DirectLinkResponse {
+  repeated DirectLink links = 1;
+}
+
+message DirectLink {
+  string id = 1;
+  string name = 2;
+  string source = 3;
+  bool enabled = 4;
+  string created_at = 5;
+  int64 views = 6;
+  int64 downloads = 7;
+}

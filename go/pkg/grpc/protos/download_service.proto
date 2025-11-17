@@ -1,0 +1,183 @@
+syntax = "proto3";
+
+package syncreve;
+
+option go_package = "github.com/xkeyC/Syncreve/pkg/grpc/protos";
+
+// DownloadService provides file download management
+service DownloadService {
+  // Add download task
+  rpc AddTask(AddDownloadTaskRequest) returns (AddDownloadTaskResponse) {}
+  
+  // Add batch download tasks by directory
+  rpc AddTasksByDir(AddDownloadTasksByDirRequest) returns (AddDownloadTaskResponse) {}
+  
+  // Cancel download task
+  rpc CancelTask(CancelTaskRequest) returns (CancelTaskResponse) {}
+  
+  // Get download task info
+  rpc GetTaskInfo(GetTaskInfoRequest) returns (TaskInfoResponse) {}
+  
+  // List download tasks
+  rpc ListTasks(ListTasksRequest) returns (ListTasksResponse) {}
+  
+  // Get task status stream
+  rpc WatchTaskStatus(WatchTaskStatusRequest) returns (stream TaskStatusUpdate) {}
+  
+  // Pause download task
+  rpc PauseTask(PauseTaskRequest) returns (PauseTaskResponse) {}
+  
+  // Resume download task
+  rpc ResumeTask(ResumeTaskRequest) returns (ResumeTaskResponse) {}
+  
+  // Retry failed task
+  rpc RetryTask(RetryTaskRequest) returns (RetryTaskResponse) {}
+  
+  // Clear completed tasks
+  rpc ClearCompleted(ClearCompletedRequest) returns (ClearCompletedResponse) {}
+  
+  // Get download statistics
+  rpc GetStats(GetStatsRequest) returns (StatsResponse) {}
+}
+
+enum TaskStatus {
+  WAITING = 0;
+  DOWNLOADING = 1;
+  PAUSED = 2;
+  COMPLETED = 3;
+  FAILED = 4;
+  CANCELLED = 5;
+}
+
+enum TaskType {
+  NORMAL = 0;
+  BATCH = 1;
+  SYNC = 2;
+}
+
+message DownloadTaskInfo {
+  string id = 1;
+  string account_id = 2;
+  string file_id = 3;
+  string file_name = 4;
+  string save_path = 5;
+  int64 total_size = 6;
+  int64 downloaded_size = 7;
+  TaskStatus status = 8;
+  TaskType type = 9;
+  string error = 10;
+  string created_at = 11;
+  string updated_at = 12;
+  optional string completed_at = 13;
+  optional double speed = 14; // bytes per second
+  optional double progress = 15; // 0-100
+}
+
+message AddDownloadTaskRequest {
+  string account_id = 1;
+  repeated FileToDownload files = 2;
+  string save_path = 3;
+  TaskType type = 4;
+}
+
+message FileToDownload {
+  string file_id = 1;
+  string file_name = 2;
+  optional string uri = 3;
+}
+
+message AddDownloadTasksByDirRequest {
+  string account_id = 1;
+  string dir_path = 2;
+  string save_path = 3;
+  TaskType type = 4;
+}
+
+message AddDownloadTaskResponse {
+  repeated string task_ids = 1;
+}
+
+message CancelTaskRequest {
+  string task_id = 1;
+}
+
+message CancelTaskResponse {
+  bool success = 1;
+  optional string error = 2;
+}
+
+message GetTaskInfoRequest {
+  string task_id = 1;
+}
+
+message TaskInfoResponse {
+  DownloadTaskInfo task = 1;
+}
+
+message ListTasksRequest {
+  string account_id = 1;
+  optional TaskStatus status = 2;
+  optional TaskType type = 3;
+  optional int32 page = 4;
+  optional int32 per_page = 5;
+}
+
+message ListTasksResponse {
+  repeated DownloadTaskInfo tasks = 1;
+  int64 total = 2;
+}
+
+message WatchTaskStatusRequest {
+  optional string task_id = 1; // If not set, watch all tasks
+}
+
+message TaskStatusUpdate {
+  DownloadTaskInfo task = 1;
+}
+
+message PauseTaskRequest {
+  string task_id = 1;
+}
+
+message PauseTaskResponse {
+  bool success = 1;
+}
+
+message ResumeTaskRequest {
+  string task_id = 1;
+}
+
+message ResumeTaskResponse {
+  bool success = 1;
+}
+
+message RetryTaskRequest {
+  string task_id = 1;
+}
+
+message RetryTaskResponse {
+  bool success = 1;
+  optional string new_task_id = 2;
+}
+
+message ClearCompletedRequest {
+  string account_id = 1;
+}
+
+message ClearCompletedResponse {
+  int32 cleared_count = 1;
+}
+
+message GetStatsRequest {
+  string account_id = 1;
+}
+
+message StatsResponse {
+  int64 total_tasks = 1;
+  int64 waiting_tasks = 2;
+  int64 downloading_tasks = 3;
+  int64 completed_tasks = 4;
+  int64 failed_tasks = 5;
+  double total_downloaded_size = 6;
+  double current_speed = 7;
+}

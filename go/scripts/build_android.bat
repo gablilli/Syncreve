@@ -3,17 +3,14 @@ REM Build Android library using gomobile
 
 echo Building Syncreve Android library...
 
-REM Check if gomobile is installed
-where gomobile >nul 2>nul
-if %ERRORLEVEL% NEQ 0 (
-    echo Installing gomobile...
-    go install golang.org/x/mobile/cmd/gomobile@latest
-    go install golang.org/x/mobile/cmd/gobind@latest
-    gomobile init
-)
+echo Installing gomobile...
+go install golang.org/x/mobile/cmd/gomobile@latest
+go install golang.org/x/mobile/cmd/gobind@latest
+go get golang.org/x/mobile/bind
+gomobile init
 
 REM Set output directory
-set OUTPUT_DIR=..\..\mobile\android\app\libs
+set OUTPUT_DIR=..\..\android\app\libs
 
 REM Create output directory if it doesn't exist
 if not exist "%OUTPUT_DIR%" mkdir "%OUTPUT_DIR%"

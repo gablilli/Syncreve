@@ -4,15 +4,13 @@
 echo "Building Syncreve Android library..."
 
 # Check if gomobile is installed
-if ! command -v gomobile &> /dev/null; then
-    echo "Installing gomobile..."
-    go install golang.org/x/mobile/cmd/gomobile@latest
-    go install golang.org/x/mobile/cmd/gobind@latest
-    gomobile init
-fi
+echo "Installing gomobile..."
+go install golang.org/x/mobile/cmd/gomobile@latest
+go install golang.org/x/mobile/cmd/gobind@latest
+gomobile init
 
 # Set output directory
-OUTPUT_DIR="../../mobile/android/app/libs"
+OUTPUT_DIR="../../android/app/libs"
 
 # Create output directory if it doesn't exist
 mkdir -p "$OUTPUT_DIR"
